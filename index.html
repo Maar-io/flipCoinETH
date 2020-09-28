@@ -17,17 +17,17 @@
     <img src="images/eth.png" alt="Flipcoin app" width="40" height="40">
     <h1 class="text-white">Flip ETH Coin</h1>
     <br>
-    <table class="text-white table">   
+    <table class="text-gray table">   
         <thead>
             <tr>
-              <th>Pool status (ETH)</th>
+              <th>Pool max bet (ETH)</th>
               <th >Your account (ETH)</th>
             </tr>
         </thead>    
         <tbody>
         <tr>
-            <td>100</td>
-            <td id="userAccountStatus">2.5</td>
+            <td id="poolMax">0</td>
+            <td id="userAccountStatus">0</td>
         </tr>
         </tbody> 
     </table>
@@ -40,31 +40,39 @@
             </div>
             <br>
         </div>
-        <div>
-        </div>
     </div>
     
     
     <br>
-    <h2>Pick your bet amount</h2>
-    <div id="my-btns" class="container">
-        <div class="btn-group" data-toggle="buttons">
-            <label class="btn btn-default active">
-                <input type="radio" autocomplete="off" checked value="A"> radio button A
-            </label>
-            <label class="btn btn-default">
-                <input type="radio" autocomplete="off" value="B"> radio button B
-            </label>
-            <label class="btn btn-default">
-                <input type="radio" autocomplete="off" value="C"> radio button C
-            </label>
+    <div class="container text-white">
+        <strong>Pick your bet amount</strong>
+        <div class="form-check">
+           <input class="form-check-input" type="radio" name="ethValue" id="eth01" value="0.1" checked>
+           <label class="form-check-label" for="eth01">
+           0.1
+           </label>
+        </div>
+        <div class="form-check">
+           <input class="form-check-input" type="radio" name="ethValue" id="eth02" value="0.2">
+           <label class="form-check-label" for="eth02">
+           0.2
+           </label>
+        </div>
+        <div class="form-check">
+           <input class="form-check-input" type="radio" name="ethValue" id="eth05" value="0.5">
+           <label class="form-check-label" for="eth05">
+           0.5
+           </label>
+        </div>
+        <div class="form-check">
+           <input class="form-check-input" type="radio" name="ethValue" id="eth1" value="1">
+           <label class="form-check-label" for="eth1">           1           </label>
         </div>
     </div>
 
-    <div id="output"></div>
-
-    <div>
-        <button id="bet-head" type="button" class="btn btn-primary btn-lg p-20">ETH Head</button>
+    <br>
+    <div class="input-group mb-2">
+        <button id="bet-head" type="button" class="btn btn-primary btn-warning">ETH Head</button>
         <button id="bet-tail" type="button" class="btn btn-primary btn-lg">ETH tail</button>
     </div>
     <br>

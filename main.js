@@ -1,32 +1,34 @@
 $(document).ready(function() {
 
-    $("#eth-1").click(input1ETH);
-    $("#eth-05").click(input05ETH);
-    $("#eth-custom").click(inputCustomETH);
     $("#register").click(registerWithContract);
-
+    $("#bet-head").click(betOnHead);
+    $("#bet-tail").click(betOnTail);
+    
 });
 
 function registerWithContract(){
     var userAddr = $("#user_eth_addr").val();
     console.log("click register");
     console.log(userAddr);
-    $("#userAccountStatus").text("1000000");
+    $("#userAccountStatus").text("10000000");
+    
+}
+function betOnTail(){
+    betOn(false);
+}
+function betOnHead(){
+    betOn(true);
+}
+function betOn(betHead){
+    console.log("bet on ...");
+    var ethValue = $("input[name='ethValue']:checked").val();
+    if(betHead){
+        console.log("bet on HEAD, eth = " + ethValue);
+        $("#poolMax").text("Head");
 
-}
-function input1ETH(){
-    console.log("click ETH-1");
-    inputETH(1);
-}
-function input05ETH(){
-    console.log("click ETH-05");
-    inputETH(0.5);
-}
-function inputCustomETH(){
-    console.log("click ETH-Custom");
-    inputETH(0.1);
-}
-
-function inputETH(amount){
-    console.log("bet on eth=" + amount);
+    }
+    else{
+        console.log("bet on TAIL, eth = " + ethValue);
+        $("#poolMax").text("Tail");
+    }
 }
