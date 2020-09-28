@@ -8,17 +8,18 @@ contract Flipcoin is Ownable{
       uint won;
       uint plays;
     }
-    uint8 HEAD = 1; // intentionaly not 0
-    uint8 TAIL = 2; // intentionaly not 0
+
     event playerRegistered(address adr);
     event coinFlipResult(string messageToPlayer);
 
     uint public balance;
     uint MIN_BET = 0.1 ether;
-    modifier costs(uint cost){
+    
+    modifier costs(){
         require(msg.value >= MIN_BET);
         _;
     }
+    
     function isRegistered(address sender) private view returns(bool){
         for (uint i=0; i<creators.length; i++) {
             if (sender == creators[i]){
@@ -45,9 +46,8 @@ contract Flipcoin is Ownable{
         emit playerRegistered(creator);
     }
 
-    //function flipCoin() public payable costs(){
-    function flipCoin(bool betOnHead) public returns (bool){
-      //balance += msg.value;
+    function flipCoin(bool betOnHead) public payable costs() returns (bool){
+        balance += msg.value;
         bool result;
         isRegistered(msg.sender);
         
