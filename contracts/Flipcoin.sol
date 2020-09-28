@@ -11,28 +11,24 @@ contract Flipcoin is Ownable{
 
     event playerRegistered(address adr);
     event coinFlipResult(string messageToPlayer);
+    event fundsSentToPlayer(string messageToPlayer, uint toTransfer);
 
     uint public balance;
     uint MIN_BET = 0.1 ether;
-    
-    modifier costs(){
-        require(msg.value >= MIN_BET);
+    uint MIN_INITIAL_FUNDS = 5 ether;
+
+    modifier costs(uint msgFunds){
+        require(msg.value >= msgFunds);
         _;
     }
     
-    function isRegistered(address sender) private view returns(bool){
-        for (uint i=0; i<creators.length; i++) {
-            if (sender == creators[i]){
-                return true;
-            }
-        }
-        //console.log("Please register before using this contract");
-        return false;
-    }
-
     mapping (address => Player) private gambler;
     address[] public creators; //TODO change to private
-
+    
+    function depositFunds() public payable onlyOwner costs(MIN_INITIAL_FUNDS){
+        balance += msg.value;
+    }
+    
     function register() public{
         Player memory newPlayer;
         address creator = msg.sender;
@@ -45,15 +41,25 @@ contract Flipcoin is Ownable{
         creators.push(creator); //save player's address to creators array
         emit playerRegistered(creator);
     }
+    
+    function isRegistered(address sender) private view returns(bool){
+        for (uint i=0; i<creators.length; i++) {
+            if (sender == creators[i]){
+                return true;
+            }
+        }
+        //Please register before using this contract
+        return false;
+    }
 
-    function flipCoin(bool betOnHead) public payable costs() returns (bool){
-        balance += msg.value;
+    function flipCoin(bool betOnHead) public payable costs(MIN_BET) returns (bool){
+        uint downPayment = msg.value;
+        balance += downPayment;
         bool result;
-        isRegistered(msg.sender);
+        assert (isRegistered(msg.sender) == true);
         
-        //This creates a person
         gambler[msg.sender].plays++;
-        result = isWinner(betOnHead) ;
+        result = isWinner(betOnHead, downPayment) ;
         if (result) {
             gambler[msg.sender].won++;
             emit coinFlipResult("winner");
@@ -65,18 +71,17 @@ contract Flipcoin is Ownable{
         return result;
     }
 
-    function isWinner(bool betOnHead) private view returns(bool){
+    function isWinner(bool betOnHead, uint downPayment) private returns(bool){
         bool flippedHead = goFlip();
         if (flippedHead && betOnHead == true){
-            //console.log("HEAD is winner");
+            sendFundsToWinner(downPayment);
             return true;
         }
         else if(!flippedHead && betOnHead == false){
-            //console.log("TAIL is winner");
+            sendFundsToWinner(downPayment);
             return true;
         }
         else{
-            //console.log("You loose");
             return false;
         }
     }
@@ -89,6 +94,13 @@ contract Flipcoin is Ownable{
         return false;
     }
 
+    function sendFundsToWinner(uint downPayment) private{
+       uint toTransfer = downPayment * 2;
+       balance -= toTransfer;
+       msg.sender.transfer(toTransfer);
+       emit fundsSentToPlayer("Funds sent to player ", toTransfer);
+    } 
+    
     function getPlayerData() public view returns(uint won, uint lost, uint plays){
         address creator = msg.sender;
         return (gambler[creator].won, gambler[creator].lost, gambler[creator].plays);
@@ -98,7 +110,6 @@ contract Flipcoin is Ownable{
        uint toTransfer = balance;
        balance = 0;
        msg.sender.transfer(toTransfer);
-       //console.log("withrawal of all fonds from contract, value = " + toTransfer);
        return toTransfer;
    }
 
