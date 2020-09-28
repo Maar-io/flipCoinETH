@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip Coin</title>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"></script>
+    <script type="text/javascript" src="./web3.min.js"></script>
+    <script type="text/javascript" src="./main.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <img src="images/eth.png" alt="Flipcoin app" width="40" height="40">
+    <h1 class="text-white">Flip ETH Coin</h1>
+    <br>
+    <table class="text-white table">   
+        <thead>
+            <tr>
+              <th>Pool status (ETH)</th>
+              <th >Your account (ETH)</th>
+            </tr>
+        </thead>    
+        <tbody>
+        <tr>
+            <td>100</td>
+            <td id="userAccountStatus">2.5</td>
+        </tr>
+        </tbody> 
+    </table>
+    <br>
+    <div class="container">
+        <div class="left-block">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control input-sm" id="user_eth_addr" placeholder="Enter your eth account address 0x..." >
+                <button id="register" text-white type="button" class="btn btn-primary btn-warning">Register your account</button>
+            </div>
+            <br>
+        </div>
+        <div>
+        </div>
+    </div>
+    
+    
+    <br>
+    <h2>Pick your bet amount</h2>
+    <div id="my-btns" class="container">
+        <div class="btn-group" data-toggle="buttons">
+            <label class="btn btn-default active">
+                <input type="radio" autocomplete="off" checked value="A"> radio button A
+            </label>
+            <label class="btn btn-default">
+                <input type="radio" autocomplete="off" value="B"> radio button B
+            </label>
+            <label class="btn btn-default">
+                <input type="radio" autocomplete="off" value="C"> radio button C
+            </label>
+        </div>
+    </div>
+
+    <div id="output"></div>
+
+    <div>
+        <button id="bet-head" type="button" class="btn btn-primary btn-lg p-20">ETH Head</button>
+        <button id="bet-tail" type="button" class="btn btn-primary btn-lg">ETH tail</button>
+    </div>
+    <br>
+</body>
+</html>
