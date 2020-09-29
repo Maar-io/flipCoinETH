@@ -16,13 +16,10 @@ $(document).ready(function() {
       $("#userAccount").text(accounts[0]);
       console.log(contractInstance);
       contractInstance.methods.getContractBalance().call()
-        .then(console.log);
-      /*
-      contractInstance.methods.getContractBalance().call()
         .then(function(contractBalance){
-            console.log("contractBalance = " + contractBalance);
+            console.log(contractBalance);
             $("#poolMax").text(contractBalance);
-        });*/
+        });
     });
     $("#register").click(registerWithContract);
     $("#bet-head").click(betOnHead);
