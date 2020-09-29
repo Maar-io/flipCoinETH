@@ -25,7 +25,7 @@ contract Flipcoin is Ownable{
     mapping (address => Player) private gambler;
     address[] public creators; //TODO change to private
     
-    function depositFunds() public payable onlyOwner costs(MIN_INITIAL_FUNDS){
+    function depositFunds() public payable onlyOwner{
         balance += msg.value;
     }
     
@@ -105,12 +105,16 @@ contract Flipcoin is Ownable{
         address creator = msg.sender;
         return (gambler[creator].won, gambler[creator].lost, gambler[creator].plays);
     }
+    
+    function getContractBalance() public view returns (uint){
+        return balance;
+    }
 
-   function withdrawAll() public onlyOwner returns(uint) {
+    function withdrawAll() public onlyOwner returns(uint) {
        uint toTransfer = balance;
        balance = 0;
        msg.sender.transfer(toTransfer);
        return toTransfer;
-   }
+    }
 
 }
