@@ -3,6 +3,7 @@ console.log("web3 version = " + web3.version);
 var contractInstance;
 var myMetaMaskAccount = "0x0C61Cfcdc9F84eD58271f3490960346623De2315"; // not needed, testing only
 var contractAddress = "0xB587a9d161c5E0480a16F239e2360C5aBdf080E1";
+var poolLimit = 0;
 
 $(document).ready(function() {
     window.ethereum.enable().then(function(accounts){
@@ -18,7 +19,9 @@ $(document).ready(function() {
       contractInstance.methods.getContractBalance().call()
         .then(function(contractBalance){
             console.log(contractBalance);
-            $("#poolMax").text(contractBalance);
+            poolLimit = Web3.utils.fromWei(contractBalance, 'ether');
+            console.log(poolLimit);
+            $("#poolMax").text(poolLimit);
         });
     });
     $("#register").click(registerWithContract);
