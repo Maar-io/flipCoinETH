@@ -15,12 +15,19 @@
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <img src="images/eth.png" alt="Flipcoin app" width="40" height="40">
-    <h1 class="text-white">Flip ETH Coin</h1>
-    <p id="userAccount" class="text-white">0x...</p>
+    <div class="container text-white">
+        <div class="row">
+            <img src="images/eth.png" alt="Flipcoin app" width="40" height="40">
+            <span class="text-xl-left" id="websiteTitle">Flip ETH Coin</span>
+        </div>
+    </div>
+    <div>
+        <p class="text-lg-right text-white">Your account: </p>
+        <p id="userAccount" class="border border-success text-lg-right text-white">0x...</p>
+    </div>
 
     <br>
-    <table class="text-white table">   
+    <table class="table table-dark">   
         <thead>
             <tr>
               <th>Pool max bet (ETH)</th>
@@ -63,18 +70,14 @@
         </div>
     </div>
 
-    <br>
-    <div class="input-group mb-2">
-        <button id="bet-head" type="button" class="btn btn-primary btn-warning">ETH Head</button>
-        <button id="bet-tail" type="button" class="btn btn-primary btn-lg">ETH tail</button>
-    </div>
-    <br>
-
-    <div class="card" style="width: 18rem;">
+    <div class="card col-sm-6 text-white bg-secondary mb-3" style="width: 24rem;">
+        <h5 class="card-header">Press button to place your bet</h5>
         <div class="card-body">
-          <h5 class="card-title">Press above button to place your bet</h5>
           <p id="result-text" class="card-text">-</p>
+          <a id="bet-tail" class="btn btn-primary">Tail</a>
+          <a id="bet-head" class="btn btn-warning">Head</a>
         </div>
+    </div>
     </div>
 
 </body>
