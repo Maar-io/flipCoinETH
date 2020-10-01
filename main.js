@@ -29,6 +29,7 @@ function refreshbalances(){
 
     // get contract instance
     contractInstance = new web3.eth.Contract(abi, contractAddress, {from: userAccount});
+    $("#userAccount").removeClass("text-danger").addClass("text-success");
     $("#userAccount").text(userAccount);
     console.log(contractInstance);
     
@@ -83,10 +84,9 @@ function betOn(betHead){
     .on('receipt', function(receipt){
         console.log(receipt);
     })
-    .then(function(result){
+    .then(function(isWinner){
         console.log("bet result");
-        console.log(result);
-        isWinner = result["winning"];
+        console.log(isWinner);
         if(isWinner){
             $("#result-text").removeClass("text-white").addClass("text-success");
             $("#result-text").text("You won!!!!!");
