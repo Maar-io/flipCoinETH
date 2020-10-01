@@ -1,4 +1,4 @@
-abi= [
+abi = [
   {
     "anonymous": false,
     "inputs": [
@@ -102,15 +102,6 @@ abi= [
     "outputs": [],
     "payable": true,
     "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [],
-    "name": "register",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

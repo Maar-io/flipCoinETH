@@ -29,7 +29,7 @@ contract Flipcoin is Ownable{
         balance += msg.value;
     }
     
-    function register() public{
+    function register() private{
         Player memory newPlayer;
         address creator = msg.sender;
         
@@ -42,21 +42,24 @@ contract Flipcoin is Ownable{
         emit playerRegistered(creator);
     }
     
-    function isRegistered(address sender) private view returns(bool){
+    function isRegistered(address sender) private{
+        bool userRegistered = false;
         for (uint i=0; i<creators.length; i++) {
             if (sender == creators[i]){
-                return true;
+                userRegistered = true;
             }
         }
-        //Please register before using this contract
-        return false;
+        //Register before using this contract
+        if(!userRegistered){
+            register();
+        }
     }
 
     function flipCoin(bool betOnHead) public payable costs(MIN_BET) returns (bool){
         uint downPayment = msg.value;
         balance += downPayment;
         bool result;
-        assert (isRegistered(msg.sender) == true);
+        isRegistered(msg.sender);
         
         gambler[msg.sender].plays++;
         result = isWinner(betOnHead, downPayment) ;
