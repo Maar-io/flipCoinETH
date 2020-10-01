@@ -69,6 +69,8 @@ function betOnHead(){
 }
 
 function betOn(betHead){
+    $("#result-text").removeClass("text-danger text-success").addClass("text-white");
+    $("#result-text").text("??????????????????????");
     console.log("betHead " + betHead + " with eth=" + ethValue);
     var ethValue = $("input[name='ethValue']:checked").val();
     contractInstance.methods.flipCoin(betHead).send({value: web3.utils.toWei(ethValue, "ether")})
@@ -86,9 +88,11 @@ function betOn(betHead){
         console.log(result);
         isWinner = result["winning"];
         if(isWinner){
+            $("#result-text").removeClass("text-white").addClass("text-success");
             $("#result-text").text("You won!!!!!");
         }
         else{
+            $("#result-text").removeClass("text-white").addClass("text-danger");
             $("#result-text").text("You lost :(");
         }
         refreshbalances();

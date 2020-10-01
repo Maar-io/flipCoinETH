@@ -15,37 +15,37 @@
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <div class="container text-white">
-        <div class="row">
-            <img src="images/eth.png" alt="Flipcoin app" width="40" height="40">
-            <span class="text-lg-right" id="websiteTitle">Flip ETH Coin</span>
-        </div>
+    <div>
+        <img src="images/eth.png" alt="Flipcoin app" width="30" height="40">
+        <span class="text-white" id="websiteTitle">Flip ETH Coin</span>
     </div>
     <div>
-        <p class="text-white">Your account: </p>
-        <p id="userAccount" class="border border-success text-lg-right text-white">0x...</p>
+        <p class="text-white text-lg-right">Your account:   </p>
+        <p id="userAccount" class="text-right text-white">0x...</p>
     </div>
 
     <br>
-    <table class="table table-dark">   
+
+    <table class="table text-white">
         <thead>
-            <tr>
-              <th>Pool max bet (ETH)</th>
-              <th >Your account (ETH)</th>
-            </tr>
-        </thead>    
+          <tr>
+            <th scope="col">Bet pool balance (ETH)</th>
+            <th scope="col">Your account (ETH)</th>
+          </tr>
+        </thead>
         <tbody>
-        <tr>
-            <td id="poolMax">xxx</td>
-            <td id="userAccountStatus">0</td>
-        </tr>
-        </tbody> 
+          <tr>
+            <td id="poolMax">???</td>
+            <td id="userAccountStatus">???</td>
+          </tr>
+        </tbody>
     </table>
+
     <br>
-    <div class="container col-lg-4 col-md-6 col-sm-12 text-white">
+    <div class="container col-lg-8 col-md-8 col-sm-12 text-white">
         <div class="row">
             <div class="card  text-center bg-secondary mb-3" style="width: 18rem;">
-                <h5 class="card-header">Pick your bet amount</h5>
+                <h5 class="card-header">1. Pick your bet amount</h5>
                 <div class="card-body">
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="ethValue" id="eth01" value="0.1" checked>
@@ -75,16 +75,16 @@
             </div>
                 
             <span class="card  text-center bg-secondary mb-3" style="width: 18rem;">
-                <h5 class="card-header">Press button to place your bet</h5>
+                <h5 class="card-header">2. Press button to place your bet</h5>
                 <div class="card-body">
-                    <p id="result-text" class="card-text">-</p>
+                    <p id="result-text" class="card-text text-white">-</p>
                     <a id="bet-tail" class="btn btn-primary">Tail</a>
                     <a id="bet-head" class="btn btn-warning">Head</a>
                 </div>
             </span>
             
             <span class="card bg-secondary mb-3" style="width: 18rem;">
-                <h5 class="card-header">Your statistics</h5>
+                <h5 class="card-header">3. Your statistics</h5>
                 <div class="card-body">
                     <p id="stat-play" class="card-text">plays: 0</p>
                     <p id="stat-won" class="card-text>">won: 0</p>
