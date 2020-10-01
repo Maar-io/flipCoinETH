@@ -55,7 +55,7 @@ contract Flipcoin is Ownable{
         }
     }
 
-    function flipCoin(bool betOnHead) public payable costs(MIN_BET) returns (bool){
+    function flipCoin(bool betOnHead) public payable costs(MIN_BET) returns (bool winning){
         uint downPayment = msg.value;
         balance += downPayment;
         bool result;
@@ -74,7 +74,7 @@ contract Flipcoin is Ownable{
         return result;
     }
 
-    function isWinner(bool betOnHead, uint downPayment) private returns(bool winning){
+    function isWinner(bool betOnHead, uint downPayment) private returns(bool){
         bool flippedHead = goFlip();
         if (flippedHead && betOnHead == true){
             sendFundsToWinner(downPayment);

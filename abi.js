@@ -117,7 +117,7 @@ abi = [
     "outputs": [
       {
         "internalType": "bool",
-        "name": "",
+        "name": "winning",
         "type": "bool"
       }
     ],

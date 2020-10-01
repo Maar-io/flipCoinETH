@@ -3,7 +3,7 @@ console.log("web3 version = " + web3.version);
 var contractInstance;
 var userAccount;
 var myMetaMaskAccount = "0x0C61Cfcdc9F84eD58271f3490960346623De2315"; // not needed, testing only
-var contractAddress = "0xC0e200dC119bcF3F6AF55F56B98783166BbC6Bef";
+var contractAddress = "0x684Ec4fE257B59E9403716D0161aB34E907B8568";
 var poolLimit = 0;
 var userLimit = 0;
 
@@ -53,13 +53,13 @@ function refreshbalances(){
 function refreshStats(){
     console.log("Refresh statistics");
     contractInstance.methods.getPlayerData().call()
-    .then(function(res){
-        console.log(res);
-        console.log(res["plays"]);
-        $("#stat-play").text("Plays: "+ res["plays"]);
-        $("#stat-won").text("Won: "+ res["won"]);
-        $("#stat-lost").text("Lost: "+ res["lost"]);
-    });
+    .then((res) => {
+            console.log(res);
+            console.log(res["plays"]);
+            $("#stat-play").text("Plays: " + res["plays"]);
+            $("#stat-won").text("Won: " + res["won"]);
+            $("#stat-lost").text("Lost: " + res["lost"]);
+        });
 }
 
 function betOnTail(){
@@ -84,18 +84,19 @@ function betOn(betHead){
     .on('receipt', function(receipt){
         console.log(receipt);
     })
-    .then(function(isWinner){
-        console.log("bet result");
-        console.log(isWinner);
-        if(isWinner){
-            $("#result-text").removeClass("text-white").addClass("text-success");
-            $("#result-text").text("You won!!!!!");
-        }
-        else{
-            $("#result-text").removeClass("text-white").addClass("text-danger");
-            $("#result-text").text("You lost :(");
-        }
-        refreshbalances();
-        refreshStats();
-    });
+    .then((result) => {
+            console.log(result["events"]);
+            let isWinner = result["events"]["coinFlipResult"]["returnValues"][0];
+            console.log("bet result: " + isWinner);
+            if (isWinner == "winner") {
+                $("#result-text").removeClass("text-white").addClass("text-success");
+                $("#result-text").text("You won!!!!!");
+            }
+            else {
+                $("#result-text").removeClass("text-white").addClass("text-danger");
+                $("#result-text").text("You lost :(");
+            }
+            refreshbalances();
+            refreshStats();
+        });
 }
