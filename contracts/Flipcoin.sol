@@ -74,7 +74,7 @@ contract Flipcoin is Ownable{
         return result;
     }
 
-    function isWinner(bool betOnHead, uint downPayment) private returns(bool){
+    function isWinner(bool betOnHead, uint downPayment) private returns(bool winning){
         bool flippedHead = goFlip();
         if (flippedHead && betOnHead == true){
             sendFundsToWinner(downPayment);

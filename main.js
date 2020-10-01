@@ -35,18 +35,29 @@ function refreshbalances(){
     // get contract balance
     contractInstance.methods.getContractBalance().call()
     .then(function(contractBalance){
-        console.log(contractBalance);
         poolLimit = Web3.utils.fromWei(contractBalance, 'ether');
-        console.log(poolLimit);
+        console.log("pool = " + poolLimit);
         $("#poolMax").text(poolLimit);
     });
     
     // get user balance
     web3.eth.getBalance(userAccount)
     .then(function(accountBalance){
-        console.log(accountBalance);
         userLimit = Web3.utils.fromWei(accountBalance, 'ether');
+        console.log(userLimit);
         $("#userAccountStatus").text(userLimit);
+    });
+}
+
+function refreshStats(){
+    console.log("Refresh statistics");
+    contractInstance.methods.getPlayerData().call()
+    .then(function(res){
+        console.log(res);
+        console.log(res["plays"]);
+        $("#stat-play").text("Plays: "+ res["plays"]);
+        $("#stat-won").text("Won: "+ res["won"]);
+        $("#stat-lost").text("Lost: "+ res["lost"]);
     });
 }
 
@@ -68,15 +79,19 @@ function betOn(betHead){
         console.log("conf");
     })
     .on('receipt', function(receipt){
-      console.log(receipt);
+        console.log(receipt);
     })
-    .then(function(isWinner){
+    .then(function(result){
+        console.log("bet result");
+        console.log(result);
+        isWinner = result["winning"];
         if(isWinner){
             $("#result-text").text("You won!!!!!");
         }
         else{
             $("#result-text").text("You lost :(");
         }
+        refreshbalances();
+        refreshStats();
     });
-    refreshbalances();
 }

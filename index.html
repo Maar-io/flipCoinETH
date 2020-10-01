@@ -22,7 +22,7 @@
         </div>
     </div>
     <div>
-        <p class="text-lg-right text-white">Your account: </p>
+        <p class="text-white">Your account: </p>
         <p id="userAccount" class="border border-success text-lg-right text-white">0x...</p>
     </div>
 
@@ -42,42 +42,55 @@
         </tbody> 
     </table>
     <br>
-    
-    <br>
-    <div class="container text-white offset-100">
-        <strong>Pick your bet amount</strong>
-        <div class="form-check">
-           <input class="form-check-input" type="radio" name="ethValue" id="eth01" value="0.1" checked>
-           <label class="form-check-label" for="eth01">
-           0.1
-           </label>
-        </div>
-        <div class="form-check">
-           <input class="form-check-input" type="radio" name="ethValue" id="eth02" value="0.2">
-           <label class="form-check-label" for="eth02">
-           0.2
-           </label>
-        </div>
-        <div class="form-check">
-           <input class="form-check-input" type="radio" name="ethValue" id="eth05" value="0.5">
-           <label class="form-check-label" for="eth05">
-           0.5
-           </label>
-        </div>
-        <div class="form-check">
-           <input class="form-check-input" type="radio" name="ethValue" id="eth1" value="1">
-           <label class="form-check-label" for="eth1">           1           </label>
-        </div>
-    </div>
+    <div class="container col-lg-4 col-md-6 col-sm-12 text-white">
+        <div class="row">
+            <strong>Pick your bet amount</strong>
+            <div>
 
-    <div class="card col-sm-6 text-white offset-100 bg-secondary mb-3" style="width: 24rem;">
-        <h5 class="card-header">Press button to place your bet</h5>
-        <div class="card-body">
-          <p id="result-text" class="card-text">-</p>
-          <a id="bet-tail" class="btn btn-primary">Tail</a>
-          <a id="bet-head" class="btn btn-warning">Head</a>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="ethValue" id="eth01" value="0.1" checked>
+                    <label class="form-check-label" for="eth01">
+                        0.1 ETH
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="ethValue" id="eth02" value="0.2">
+                    <label class="form-check-label" for="eth02">
+                        0.2 ETH
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="ethValue" id="eth05" value="0.5">
+                    <label class="form-check-label" for="eth05">
+                        0.5 ETH
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="ethValue" id="eth1" value="1">
+                    <label class="form-check-label" for="eth1">           
+                        1 ETH          
+                    </label>
+                </div>
+            </div>
+                
+            <span class="card  text-center bg-secondary mb-3" style="width: 18rem;">
+                <h5 class="card-header">Press button to place your bet</h5>
+                <div class="card-body">
+                    <p id="result-text" class="card-text">-</p>
+                    <a id="bet-tail" class="btn btn-primary">Tail</a>
+                    <a id="bet-head" class="btn btn-warning">Head</a>
+                </div>
+            </span>
+            
+            <span class="card bg-secondary mb-3" style="width: 18rem;">
+                <h5 class="card-header">Your statistics</h5>
+                <div class="card-body">
+                    <p id="stat-play" class="card-text">plays: 0</p>
+                    <p id="stat-won" class="card-text>">won: 0</p>
+                    <p id="stat-lost" class="card-text">lost: 0</p>
+                </div>
+            </span>
         </div>
-    </div>
     </div>
 
 </body>
