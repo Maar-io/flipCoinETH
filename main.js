@@ -18,7 +18,10 @@ $(document).ready(function() {
         console.log("myMetaMaskAccount = " + myMetaMaskAccount); 
         console.log("Account isConnected = " + window.ethereum._state.isConnected);
         
+        // get contract instance
+        contractInstance = new web3.eth.Contract(abi, contractAddress, {from: userAccount});
         refreshbalances();
+        listenEvents();
     });
     $("#bet-head").click(betOnHead);
     $("#bet-tail").click(betOnTail);
@@ -27,8 +30,6 @@ $(document).ready(function() {
 function refreshbalances(){
     console.log("Let's refresh pool and user balance");
 
-    // get contract instance
-    contractInstance = new web3.eth.Contract(abi, contractAddress, {from: userAccount});
     $("#userAccount").removeClass("text-danger").addClass("text-success");
     $("#userAccount").text(userAccount);
     console.log(contractInstance);
@@ -50,6 +51,19 @@ function refreshbalances(){
     });
 }
 
+function listenEvents(){
+    myContract.events.MyEvent({
+        filter: {myIndexedParam: [20,23], myOtherIndexedParam: '0x123456789...'}, // Using an array means OR: e.g. 20 or 23
+        fromBlock: 0
+    }, function(error, event){ console.log(event); })
+    .on('data', function(event){
+        console.log(event); // same results as the optional callback above
+    })
+    .on('changed', function(event){
+        // remove event from local database
+    })
+    .on('error', console.error);    
+}
 function refreshStats(){
     console.log("Refresh statistics");
     contractInstance.methods.getPlayerData().call()
