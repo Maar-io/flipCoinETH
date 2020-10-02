@@ -1,6 +1,6 @@
 pragma solidity 0.5.12;
 import "./Ownable.sol";
-import "github.com/provable-things/ethereum-api/provableAPI.sol";
+import "./provableAPI.sol";
 
 contract Flipcoin is Ownable, usingProvable{
 
@@ -22,10 +22,10 @@ contract Flipcoin is Ownable, usingProvable{
 
     uint public balance;
     uint MIN_BET = 0.1 ether;
-    uint MIN_INITIAL_FUNDS = 5 ether;
+    uint MIN_INITIAL_FUNDS = 0.5 ether;
     uint256 constant MAX_INT_FROM_BYTE = 256;
     uint256 constant NUM_RANDOM_BYTES_REQUESTED = 1;
-
+    bytes m_proof;
     modifier costs(uint msgFunds){
         require(msg.value >= msgFunds);
         _;
@@ -35,29 +35,36 @@ contract Flipcoin is Ownable, usingProvable{
     address payable[] public creators; //TODO change to private
     
 
-    function __callback(bytes32 _queryId,string memory _result,bytes memory _proof) public {
-        require(msg.sender == provable_cbAddress());
-
+    function __callback(bytes32 _queryId, string memory _result, bytes memory _proof) public {
+        //require(msg.sender == provable_cbAddress()); TODO uncomment
+        m_proof = _proof; //not used, but compiler complains
         uint256 randomNumber = uint256(keccak256(abi.encodePacked(_result))) % 2;
         updatePlayer(_queryId, randomNumber);
     }
 
-    function queryOracle() payable public
+    function queryOracle() payable public returns (bytes32)
     {
         uint256 QUERY_EXECUTION_DELAY = 0;
         uint256 GAS_FOR_CALLBACK = 200000;
-        provable_newRandomDSQuery(
+        bytes32  queryId = provable_newRandomDSQuery(
             QUERY_EXECUTION_DELAY,
             NUM_RANDOM_BYTES_REQUESTED,
             GAS_FOR_CALLBACK
         );
+        return queryId;
     }
 
-    function updatePlayer(bytes32 _queryId, uint256 randomNumber) private{
+    function testRandom() public returns (bytes32){
+        bytes32 queryId = bytes32(keccak256(abi.encodePacked(msg.sender)));
+        __callback(queryId, "1", bytes("test"));
+        return queryId;
+    }
+
+    function updatePlayer(bytes32 queryId, uint256 randomNumber) private{
         address payable creator;
         for (uint i=0; i<creators.length; i++){
             creator = creators[i];
-            if (gambler[creator].provableQuery == _queryId){
+            if (gambler[creator].provableQuery == queryId){
                 gambler[creator].provableQuery = 0;
                 gambler[creator].provableQuery = 0;
                 break;
@@ -67,7 +74,7 @@ contract Flipcoin is Ownable, usingProvable{
         isWinner(creator, randomNumber);
     }
 
-    function depositFunds() public payable onlyOwner{
+    function depositFunds() public payable{
         balance += msg.value;
     }
     
@@ -105,6 +112,7 @@ contract Flipcoin is Ownable, usingProvable{
         balance += downPayment;
         isRegistered(msg.sender);
         queryOracle();
+        //testRandom();
         gambler[msg.sender].plays++;
         gambler[msg.sender].downPayment = downPayment;
         gambler[msg.sender].betOnHead = betOnHead;

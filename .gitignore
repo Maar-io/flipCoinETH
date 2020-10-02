@@ -1,5 +1,5 @@
 package.json
-node_modules
-builds
+node_modules/
+build/
 package-lock.json
 .secret
