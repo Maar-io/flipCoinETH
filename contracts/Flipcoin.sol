@@ -1,21 +1,30 @@
-import "./Ownable.sol";
 pragma solidity 0.5.12;
+import "./Ownable.sol";
+import "github.com/provable-things/ethereum-api/provableAPI.sol";
 
-contract Flipcoin is Ownable{
+contract Flipcoin is Ownable, usingProvable{
 
     struct Player {
       uint lost;
       uint won;
       uint plays;
+      bytes32 provableQuery;
+      bool betOnHead;
+      uint downPayment;
     }
 
     event playerRegistered(address adr);
     event coinFlipResult(string messageToPlayer);
-    event fundsSentToPlayer(string messageToPlayer, uint toTransfer);
+    event fundsSentToPlayer(string messageToPlayer, address creator, uint toTransfer);
+    event provableQuerySent(string messageToPlayer, address creator);
+    event generatedRandomNumber(string messageToPlayer, address creator, uint256 randomNumber);
+
 
     uint public balance;
     uint MIN_BET = 0.1 ether;
     uint MIN_INITIAL_FUNDS = 5 ether;
+    uint256 constant MAX_INT_FROM_BYTE = 256;
+    uint256 constant NUM_RANDOM_BYTES_REQUESTED = 1;
 
     modifier costs(uint msgFunds){
         require(msg.value >= msgFunds);
@@ -23,20 +32,55 @@ contract Flipcoin is Ownable{
     }
     
     mapping (address => Player) private gambler;
-    address[] public creators; //TODO change to private
+    address payable[] public creators; //TODO change to private
     
+
+    function __callback(bytes32 _queryId,string memory _result,bytes memory _proof) public {
+        require(msg.sender == provable_cbAddress());
+
+        uint256 randomNumber = uint256(keccak256(abi.encodePacked(_result))) % 2;
+        updatePlayer(_queryId, randomNumber);
+    }
+
+    function queryOracle() payable public
+    {
+        uint256 QUERY_EXECUTION_DELAY = 0;
+        uint256 GAS_FOR_CALLBACK = 200000;
+        provable_newRandomDSQuery(
+            QUERY_EXECUTION_DELAY,
+            NUM_RANDOM_BYTES_REQUESTED,
+            GAS_FOR_CALLBACK
+        );
+    }
+
+    function updatePlayer(bytes32 _queryId, uint256 randomNumber) private{
+        address payable creator;
+        for (uint i=0; i<creators.length; i++){
+            creator = creators[i];
+            if (gambler[creator].provableQuery == _queryId){
+                gambler[creator].provableQuery = 0;
+                gambler[creator].provableQuery = 0;
+                break;
+            }
+        }
+        emit generatedRandomNumber("created random", creator, randomNumber);
+        isWinner(creator, randomNumber);
+    }
+
     function depositFunds() public payable onlyOwner{
         balance += msg.value;
     }
     
     function register() private{
         Player memory newPlayer;
-        address creator = msg.sender;
+        address payable creator = msg.sender;
         
         //This creates a player
         newPlayer.lost = 0;
         newPlayer.won = 0;
         newPlayer.plays = 0;
+        newPlayer.downPayment = 0;
+        newPlayer.provableQuery = 0;
         gambler[creator] = newPlayer; //create new gambler entry
         creators.push(creator); //save player's address to creators array
         emit playerRegistered(creator);
@@ -55,53 +99,45 @@ contract Flipcoin is Ownable{
         }
     }
 
-    function flipCoin(bool betOnHead) public payable costs(MIN_BET) returns (bool winning){
+    function flipCoin(bool betOnHead) public payable costs(MIN_BET){
         uint downPayment = msg.value;
+
         balance += downPayment;
-        bool result;
         isRegistered(msg.sender);
-        
+        queryOracle();
         gambler[msg.sender].plays++;
-        result = isWinner(betOnHead, downPayment) ;
-        if (result) {
-            gambler[msg.sender].won++;
-            emit coinFlipResult("winner");
+        gambler[msg.sender].downPayment = downPayment;
+        gambler[msg.sender].betOnHead = betOnHead;
+        emit provableQuerySent("provable queried", msg.sender);
+    }
+
+    function isWinner(address payable creator, uint256 randomNumber) private{
+        Player memory player = gambler[creator];
+        bool betOnHead;
+        if(randomNumber == 1){
+            betOnHead = true;
+        }
+        else if(randomNumber == 0){
+            betOnHead = false;
         }
         else{
-            gambler[msg.sender].lost++;
+            assert(false);
+        }
+        if (betOnHead == player.betOnHead) {
+            player.won++;
+            sendFundsToWinner(creator);
+        }
+        else{
+            player.lost++;
             emit coinFlipResult("loser");
         }
-        return result;
     }
 
-    function isWinner(bool betOnHead, uint downPayment) private returns(bool){
-        bool flippedHead = goFlip();
-        if (flippedHead && betOnHead == true){
-            sendFundsToWinner(downPayment);
-            return true;
-        }
-        else if(!flippedHead && betOnHead == false){
-            sendFundsToWinner(downPayment);
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
-    
-    function goFlip() private view returns (bool){
-        uint rdm = now % 2;
-        if (rdm == 1){
-            return true;
-        }
-        return false;
-    }
-
-    function sendFundsToWinner(uint downPayment) private{
-       uint toTransfer = downPayment * 2;
+    function sendFundsToWinner(address payable creator) private{
+       uint toTransfer = gambler[creator].downPayment * 2;
        balance -= toTransfer;
-       msg.sender.transfer(toTransfer);
-       emit fundsSentToPlayer("Funds sent to player ", toTransfer);
+       creator.transfer(toTransfer);
+       emit fundsSentToPlayer("Winner!!!, Funds sent to player ", creator, toTransfer);
     } 
     
     function getPlayerData() public view returns(uint won, uint lost, uint plays){
