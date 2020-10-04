@@ -1,7 +1,6 @@
 pragma solidity 0.5.12;
 import "./Ownable.sol";
 import "./provableAPI.sol";
-
 contract Flipcoin is Ownable, usingProvable{
 
     struct Player {
@@ -12,36 +11,30 @@ contract Flipcoin is Ownable, usingProvable{
       bool betOnHead;
       uint downPayment;
     }
-
+    uint public balance;
+    uint MIN_BET = 0.01 ether;
+    uint256 constant MAX_INT_FROM_BYTE = 256;
+    uint256 constant NUM_RANDOM_BYTES_REQUESTED = 1;
+    bytes m_proof;
+    mapping (address => Player) private gambler;
+    address payable[] public creators; //TODO change to private
+    
+    // EVENTS
     event playerRegistered(address adr);
     event coinFlipResult(string messageToPlayer);
     event fundsSentToPlayer(string messageToPlayer, address creator, uint toTransfer);
     event provableQuerySent(string messageToPlayer, address creator);
-    event generatedRandomNumber(string messageToPlayer, address creator, uint256 randomNumber);
-
-
-    uint public balance;
-    uint MIN_BET = 0.1 ether;
-    uint MIN_INITIAL_FUNDS = 0.5 ether;
-    uint256 constant MAX_INT_FROM_BYTE = 256;
-    uint256 constant NUM_RANDOM_BYTES_REQUESTED = 1;
-    bytes m_proof;
+    //event generatedRandomNumber(string messageToPlayer, address creator, uint256 randomNumber);
+    event generatedRandomNumber(string messageToPlayer);
+    event debug(string messageToPlayer);
+    
+    // MODIFIERS
     modifier costs(uint msgFunds){
         require(msg.value >= msgFunds);
         _;
     }
-    
-    mapping (address => Player) private gambler;
-    address payable[] public creators; //TODO change to private
-    
 
-    function __callback(bytes32 _queryId, string memory _result, bytes memory _proof) public {
-        //require(msg.sender == provable_cbAddress()); TODO uncomment
-        m_proof = _proof; //not used, but compiler complains
-        uint256 randomNumber = uint256(keccak256(abi.encodePacked(_result))) % 2;
-        updatePlayer(_queryId, randomNumber);
-    }
-
+    //get random number through Oracle
     function queryOracle() payable public returns (bytes32)
     {
         uint256 QUERY_EXECUTION_DELAY = 0;
@@ -51,13 +44,17 @@ contract Flipcoin is Ownable, usingProvable{
             NUM_RANDOM_BYTES_REQUESTED,
             GAS_FOR_CALLBACK
         );
+        emit debug("DEBUG: provable queried");
+        emit provableQuerySent("provable queried", msg.sender);
         return queryId;
     }
 
-    function testRandom() public returns (bytes32){
-        bytes32 queryId = bytes32(keccak256(abi.encodePacked(msg.sender)));
-        __callback(queryId, "1", bytes("test"));
-        return queryId;
+    // oracle callback function for random number
+    function __callback(bytes32 _queryId, string memory _result, bytes memory _proof) public {
+        //require(msg.sender == provable_cbAddress()); TODO uncomment
+        m_proof = _proof; //TODO not used
+        uint256 randomNumber = uint256(keccak256(abi.encodePacked(_result))) % 2;
+        updatePlayer(_queryId, randomNumber);
     }
 
     function updatePlayer(bytes32 queryId, uint256 randomNumber) private{
@@ -70,14 +67,40 @@ contract Flipcoin is Ownable, usingProvable{
                 break;
             }
         }
-        emit generatedRandomNumber("created random", creator, randomNumber);
+        //emit generatedRandomNumber("created random", creator, randomNumber);
+        emit generatedRandomNumber("created random");
         isWinner(creator, randomNumber);
     }
 
-    function depositFunds() public payable{
+    // used only for testing purposes to bypass oracle
+    function testRandom() public returns (bytes32){
+        bytes32 queryId = bytes32(keccak256(abi.encodePacked(msg.sender)));
+        __callback(queryId, "1", bytes("test"));
+        emit provableQuerySent("test provable queried", msg.sender);
+        return queryId;
+    }
+
+    // used to fill up the bet pool
+    function depositFunds() public payable onlyOwner{
         balance += msg.value;
     }
     
+    //check if this is revisiting player
+    function isRegistered(address sender) private{
+        bool userRegistered = false;
+        for (uint i=0; i<creators.length; i++) {
+            if (sender == creators[i]){
+                userRegistered = true;
+                break;
+            }
+        }
+        //Register new player
+        if(!userRegistered){
+            register();
+        }
+    }
+
+    // if the player is first time here, make a new entry
     function register() private{
         Player memory newPlayer;
         address payable creator = msg.sender;
@@ -93,34 +116,22 @@ contract Flipcoin is Ownable, usingProvable{
         emit playerRegistered(creator);
     }
     
-    function isRegistered(address sender) private{
-        bool userRegistered = false;
-        for (uint i=0; i<creators.length; i++) {
-            if (sender == creators[i]){
-                userRegistered = true;
-            }
-        }
-        //Register before using this contract
-        if(!userRegistered){
-            register();
-        }
-    }
 
+    // player placed a bet
     function flipCoin(bool betOnHead) public payable costs(MIN_BET){
         uint downPayment = msg.value;
 
         balance += downPayment;
         isRegistered(msg.sender);
-        queryOracle();
-        //testRandom();
+        //queryOracle();
+        testRandom();
         gambler[msg.sender].plays++;
         gambler[msg.sender].downPayment = downPayment;
         gambler[msg.sender].betOnHead = betOnHead;
-        emit provableQuerySent("provable queried", msg.sender);
     }
 
+    // compare random with the player's bet
     function isWinner(address payable creator, uint256 randomNumber) private{
-        Player memory player = gambler[creator];
         bool betOnHead;
         if(randomNumber == 1){
             betOnHead = true;
@@ -131,16 +142,17 @@ contract Flipcoin is Ownable, usingProvable{
         else{
             assert(false);
         }
-        if (betOnHead == player.betOnHead) {
-            player.won++;
+        if (betOnHead == gambler[creator].betOnHead) {
+            gambler[creator].won++;
             sendFundsToWinner(creator);
         }
         else{
-            player.lost++;
+            gambler[creator].lost++;
             emit coinFlipResult("loser");
         }
     }
 
+    //if player won, send the reward
     function sendFundsToWinner(address payable creator) private{
        uint toTransfer = gambler[creator].downPayment * 2;
        balance -= toTransfer;
@@ -148,20 +160,24 @@ contract Flipcoin is Ownable, usingProvable{
        emit fundsSentToPlayer("Winner!!!, Funds sent to player ", creator, toTransfer);
     } 
     
+    //used by frontend for statistics
     function getPlayerData() public view returns(uint won, uint lost, uint plays){
         address creator = msg.sender;
         return (gambler[creator].won, gambler[creator].lost, gambler[creator].plays);
     }
     
-    function getContractBalance() public view returns (uint){
+    //used by frontend for statistics
+    function getContractBalance() public returns (uint){
+        emit debug("DEBUG: getContractBalance");
         return balance;
     }
 
+    //withraw all funds
     function withdrawAll() public onlyOwner returns(uint) {
        uint toTransfer = balance;
        balance = 0;
        msg.sender.transfer(toTransfer);
        return toTransfer;
     }
-
 }
+
