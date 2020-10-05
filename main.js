@@ -46,9 +46,6 @@ function eventListener(){
             console.log("error in playerRegistered");
             console.log(error);
         }
-    }).on('data', function(event){
-        console.log("Event ***** playerRegistered");
-        console.log(event); 
     });
 
     contractInstance.events.provableQuerySent(function(error, result) {
@@ -61,9 +58,6 @@ function eventListener(){
             console.log("error in provableQuerySent");
             console.log(error);
         }
-    }).on('data', function(event){
-        console.log("Event ***** provableQuerySent");
-        console.log(event); 
     });
 
     contractInstance.events.generatedRandomNumber(function(error, result) {
@@ -75,10 +69,6 @@ function eventListener(){
             console.log("error in generatedRandomNumber");
             console.log(error);
         }
-    })
-    .on('data', function(event){
-        console.log("Event ***** generatedRandomNumber");
-        console.log(event); 
     });
 
     contractInstance.events.coinFlipResult(function(error, result) {
@@ -102,10 +92,6 @@ function eventListener(){
             console.log("error in coinFlipResult");
             console.log(error);
         }
-    })
-    .on('data', function(event){
-        console.log("Event ***** generatedRandomNumber");
-        console.log(event); 
     });
 }
 
