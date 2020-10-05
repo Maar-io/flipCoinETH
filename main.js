@@ -3,7 +3,7 @@ console.log("web3 version = " + web3.version);
 var contractInstance;
 var userAccount;
 var myMetaMaskAccount = "0xb7185A33d65b1bd3197779736c6D52Dda0D1E0A1"; // not needed, testing only
-var contractAddress = "0x073A57F4Fe3504e43819316bb8a795B96D6A9a56";
+var contractAddress = "0xdBE89f08D9f731DC189343BFb5A84Ada6398193E";
 var poolLimit = 0;
 var userLimit = 0;
 var clientReceiptContract;
@@ -24,6 +24,7 @@ $(document).ready(function() {
         $("#userAccount").removeClass("text-danger").addClass("text-success");
         $("#userAccount").text(userAccount);
         console.log(contractInstance);
+
         refreshbalances();
         refreshStats();
         eventListener();
@@ -33,9 +34,39 @@ $(document).ready(function() {
     $("#bet-tail").click(betOnTail);
 });
 
+
 function eventListener(){
     console.log("set event listeners");
-    var event2 = contractInstance.events.generatedRandomNumber(function(error, result) {
+    contractInstance.events.playerRegistered(function(error, result) {
+        console.log("Event playerRegistered");
+        if (!error){
+            console.log("Player " + result["returnValues"][0] + " is registered with contract");
+        }
+        else{
+            console.log("error in playerRegistered");
+            console.log(error);
+        }
+    }).on('data', function(event){
+        console.log("Event ***** playerRegistered");
+        console.log(event); 
+    });
+
+    contractInstance.events.provableQuerySent(function(error, result) {
+        console.log("Event provableQuerySent");
+        if (!error){
+            console.log(result);
+            $("#result-text").text("Waiting Oracle response...");
+        }
+        else{
+            console.log("error in provableQuerySent");
+            console.log(error);
+        }
+    }).on('data', function(event){
+        console.log("Event ***** provableQuerySent");
+        console.log(event); 
+    });
+
+    contractInstance.events.generatedRandomNumber(function(error, result) {
         console.log("Event generatedRandomNumber");
         if (!error){
             console.log(result);
@@ -44,13 +75,23 @@ function eventListener(){
             console.log("error in generatedRandomNumber");
             console.log(error);
         }
+    })
+    .on('data', function(event){
+        console.log("Event ***** generatedRandomNumber");
+        console.log(event); 
     });
 
-    var event3 = contractInstance.events.coinFlipResult(function(error, result) {
+    contractInstance.events.coinFlipResult(function(error, result) {
         console.log("Event coinFlipResult");
         if (!error){
             console.log(result);
-            if (result["returnValues"][0] === "loser"){
+            if (result["returnValues"][2] > 0){
+                refreshbalances();
+                refreshStats();
+                $("#result-text").removeClass("text-white").addClass("text-success");
+                $("#result-text").text("You won!!!!!");
+            }
+            else {
                 refreshbalances();
                 refreshStats();
                 $("#result-text").removeClass("text-white").addClass("text-danger");
@@ -61,24 +102,10 @@ function eventListener(){
             console.log("error in coinFlipResult");
             console.log(error);
         }
-    });
-    
-    var event4 = contractInstance.events.fundsSentToPlayer(function(error, result) {
-        console.log("Event fundsSentToPlayer");
-        if (!error){
-            console.log(result);
-            console.log(["returnValues"][2]);
-            if (result["returnValues"][2] > 0){
-                refreshbalances();
-                refreshStats();
-                $("#result-text").removeClass("text-white").addClass("text-success");
-                $("#result-text").text("You won!!!!!");
-            }
-        }
-        else{
-            console.log("error in fundsSentToPlayer");
-            console.log(error);
-        }
+    })
+    .on('data', function(event){
+        console.log("Event ***** generatedRandomNumber");
+        console.log(event); 
     });
 }
 
@@ -122,7 +149,7 @@ function betOnHead(){
 
 function betOn(betHead){
     $("#result-text").removeClass("text-danger text-success").addClass("text-white");
-    $("#result-text").text("Waiting network response...");
+    $("#result-text").text("Waiting network confirmation...");
     var ethValue = $("input[name='ethValue']:checked").val();
     console.log("betHead " + betHead + " with eth=" + ethValue);
     contractInstance.methods.flipCoin(betHead).send({value: web3.utils.toWei(ethValue, "ether")})
