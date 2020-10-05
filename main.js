@@ -2,11 +2,11 @@ var web3 = new Web3(Web3.givenProvider);
 console.log("web3 version = " + web3.version);
 var contractInstance;
 var userAccount;
-var myMetaMaskAccount = "0x0C61Cfcdc9F84eD58271f3490960346623De2315"; // not needed, testing only
-var contractAddress = "0x684Ec4fE257B59E9403716D0161aB34E907B8568";
+var myMetaMaskAccount = "0xb7185A33d65b1bd3197779736c6D52Dda0D1E0A1"; // not needed, testing only
+var contractAddress = "0x073A57F4Fe3504e43819316bb8a795B96D6A9a56";
 var poolLimit = 0;
 var userLimit = 0;
-
+var clientReceiptContract;
 
 $(document).ready(function() {
     window.ethereum.enable().then(function(accounts){
@@ -20,20 +20,66 @@ $(document).ready(function() {
         
         // get contract instance
         contractInstance = new web3.eth.Contract(abi, contractAddress, {from: userAccount});
+
+        $("#userAccount").removeClass("text-danger").addClass("text-success");
+        $("#userAccount").text(userAccount);
+        console.log(contractInstance);
         refreshbalances();
-        listenEvents();
+        refreshStats();
+        eventListener();
+
     });
     $("#bet-head").click(betOnHead);
     $("#bet-tail").click(betOnTail);
 });
 
+function eventListener(){
+    console.log("set event listeners");
+    var event2 = contractInstance.events.generatedRandomNumber(function(error, result) {
+        console.log("Event generatedRandomNumber");
+        if (!error){
+            console.log(result);
+        }
+        else{
+            console.log("error in generatedRandomNumber");
+            console.log(error);
+        }
+    });
+
+    var event3 = contractInstance.events.coinFlipResult(function(error, result) {
+        console.log("Event coinFlipResult");
+        if (!error){
+            console.log(result);
+            refreshbalances();
+            refreshStats();
+            $("#result-text").removeClass("text-white").addClass("text-danger");
+            $("#result-text").text("You lost :(");
+        }
+        else{
+            console.log("error in coinFlipResult");
+            console.log(error);
+        }
+    });
+
+    var event4 = contractInstance.events.fundsSentToPlayer(function(error, result) {
+        console.log("Event fundsSentToPlayer");
+        if (!error){
+            console.log(result);
+            refreshbalances();
+            refreshStats();
+            $("#result-text").removeClass("text-white").addClass("text-success");
+            $("#result-text").text("You won!!!!!");
+        }
+        else{
+            console.log("error in fundsSentToPlayer");
+            console.log(error);
+        }
+    });
+}
+
 function refreshbalances(){
     console.log("Let's refresh pool and user balance");
 
-    $("#userAccount").removeClass("text-danger").addClass("text-success");
-    $("#userAccount").text(userAccount);
-    console.log(contractInstance);
-    
     // get contract balance
     contractInstance.methods.getContractBalance().call()
     .then(function(contractBalance){
@@ -51,25 +97,12 @@ function refreshbalances(){
     });
 }
 
-function listenEvents(){
-    myContract.events.MyEvent({
-        filter: {myIndexedParam: [20,23], myOtherIndexedParam: '0x123456789...'}, // Using an array means OR: e.g. 20 or 23
-        fromBlock: 0
-    }, function(error, event){ console.log(event); })
-    .on('data', function(event){
-        console.log(event); // same results as the optional callback above
-    })
-    .on('changed', function(event){
-        // remove event from local database
-    })
-    .on('error', console.error);    
-}
 function refreshStats(){
     console.log("Refresh statistics");
     contractInstance.methods.getPlayerData().call()
     .then((res) => {
             console.log(res);
-            console.log(res["plays"]);
+            console.log("plays " + res["plays"]);
             $("#stat-play").text("Plays: " + res["plays"]);
             $("#stat-won").text("Won: " + res["won"]);
             $("#stat-lost").text("Lost: " + res["lost"]);
@@ -85,32 +118,20 @@ function betOnHead(){
 
 function betOn(betHead){
     $("#result-text").removeClass("text-danger text-success").addClass("text-white");
-    $("#result-text").text("??????????????????????");
-    console.log("betHead " + betHead + " with eth=" + ethValue);
+    $("#result-text").text("Waiting network response...");
     var ethValue = $("input[name='ethValue']:checked").val();
+    console.log("betHead " + betHead + " with eth=" + ethValue);
     contractInstance.methods.flipCoin(betHead).send({value: web3.utils.toWei(ethValue, "ether")})
     .on('transactionHash', function(hash){
-      console.log("tx hash, bet");
-    })
-    .on('confirmation', function(confirmationNumber, receipt){
-        console.log("conf");
+      console.log("tx hash");
+      console.log(hash);
+      $("#hash").text(hash);
     })
     .on('receipt', function(receipt){
+        console.log("confirmation receipt:");
         console.log(receipt);
     })
-    .then((result) => {
-            console.log(result["events"]);
-            let isWinner = result["events"]["coinFlipResult"]["returnValues"][0];
-            console.log("bet result: " + isWinner);
-            if (isWinner == "winner") {
-                $("#result-text").removeClass("text-white").addClass("text-success");
-                $("#result-text").text("You won!!!!!");
-            }
-            else {
-                $("#result-text").removeClass("text-white").addClass("text-danger");
-                $("#result-text").text("You lost :(");
-            }
-            refreshbalances();
-            refreshStats();
-        });
+    .on('confirmation', function(confirmationNumber, receipt){
+        console.log("Transaction confirmed " + confirmationNumber + " times");
+    });
 }
