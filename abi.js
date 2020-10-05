@@ -1,30 +1,4 @@
-abi= [
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "messageToPlayer",
-        "type": "string"
-      }
-    ],
-    "name": "coinFlipResult",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "messageToPlayer",
-        "type": "string"
-      }
-    ],
-    "name": "debug",
-    "type": "event"
-  },
+abi = [
   {
     "anonymous": false,
     "inputs": [
@@ -47,7 +21,7 @@ abi= [
         "type": "uint256"
       }
     ],
-    "name": "fundsSentToPlayer",
+    "name": "coinFlipResult",
     "type": "event"
   },
   {
@@ -58,6 +32,18 @@ abi= [
         "internalType": "string",
         "name": "messageToPlayer",
         "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "randomNumber",
+        "type": "uint256"
       }
     ],
     "name": "generatedRandomNumber",
@@ -271,7 +257,7 @@ abi= [
     "type": "function"
   },
   {
-    "constant": false,
+    "constant": true,
     "inputs": [],
     "name": "getContractBalance",
     "outputs": [
@@ -282,7 +268,7 @@ abi= [
       }
     ],
     "payable": false,
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
