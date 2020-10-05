@@ -17,7 +17,7 @@ $(document).ready(function() {
         }
         console.log("myMetaMaskAccount = " + myMetaMaskAccount); 
         console.log("Account isConnected = " + window.ethereum._state.isConnected);
-        
+        $("#contractHash").attr("href","https://ropsten.etherscan.io/address/"+contractAddress);
         // get contract instance
         contractInstance = new web3.eth.Contract(abi, contractAddress, {from: userAccount});
 
@@ -125,7 +125,7 @@ function betOn(betHead){
     .on('transactionHash', function(hash){
       console.log("tx hash");
       console.log(hash);
-      $("#hash").text(hash);
+      $("#txHash").attr("href","https://ropsten.etherscan.io/tx/"+hash);
     })
     .on('receipt', function(receipt){
         console.log("confirmation receipt:");
