@@ -21,12 +21,9 @@ contract Flipcoin is Ownable, usingProvable{
     
     // EVENTS
     event playerRegistered(address adr);
-    event coinFlipResult(string messageToPlayer);
-    event fundsSentToPlayer(string messageToPlayer, address creator, uint toTransfer);
+    event coinFlipResult(string messageToPlayer, address creator, uint toTransfer);
     event provableQuerySent(string messageToPlayer, address creator);
-    //event generatedRandomNumber(string messageToPlayer, address creator, uint256 randomNumber);
-    event generatedRandomNumber(string messageToPlayer);
-    event debug(string messageToPlayer);
+    event generatedRandomNumber(string messageToPlayer, address creator, uint256 randomNumber);
     
     // MODIFIERS
     modifier costs(uint msgFunds){
@@ -44,14 +41,13 @@ contract Flipcoin is Ownable, usingProvable{
             NUM_RANDOM_BYTES_REQUESTED,
             GAS_FOR_CALLBACK
         );
-        emit debug("DEBUG: provable queried");
         emit provableQuerySent("provable queried", msg.sender);
         return queryId;
     }
 
     // oracle callback function for random number
     function __callback(bytes32 _queryId, string memory _result, bytes memory _proof) public {
-        //require(msg.sender == provable_cbAddress()); TODO uncomment
+        require(msg.sender == provable_cbAddress());
         m_proof = _proof; //TODO not used
         uint256 randomNumber = uint256(keccak256(abi.encodePacked(_result))) % 2;
         updatePlayer(_queryId, randomNumber);
@@ -67,8 +63,7 @@ contract Flipcoin is Ownable, usingProvable{
                 break;
             }
         }
-        //emit generatedRandomNumber("created random", creator, randomNumber);
-        emit generatedRandomNumber("created random");
+        emit generatedRandomNumber("created random", creator, randomNumber);
         isWinner(creator, randomNumber);
     }
 
@@ -123,8 +118,8 @@ contract Flipcoin is Ownable, usingProvable{
 
         balance += downPayment;
         isRegistered(msg.sender);
-        //queryOracle();
-        testRandom();
+        queryOracle();
+        //testRandom();
         gambler[msg.sender].plays++;
         gambler[msg.sender].downPayment = downPayment;
         gambler[msg.sender].betOnHead = betOnHead;
@@ -148,7 +143,7 @@ contract Flipcoin is Ownable, usingProvable{
         }
         else{
             gambler[creator].lost++;
-            emit coinFlipResult("loser");
+            emit coinFlipResult("Player lost, Contract keeps it all :)", creator, 0);
         }
     }
 
@@ -157,7 +152,7 @@ contract Flipcoin is Ownable, usingProvable{
        uint toTransfer = gambler[creator].downPayment * 2;
        balance -= toTransfer;
        creator.transfer(toTransfer);
-       emit fundsSentToPlayer("Winner!!!, Funds sent to player ", creator, toTransfer);
+       emit coinFlipResult("Player won!!!, Funds sent to player ", creator, toTransfer);
     } 
     
     //used by frontend for statistics
@@ -167,8 +162,7 @@ contract Flipcoin is Ownable, usingProvable{
     }
     
     //used by frontend for statistics
-    function getContractBalance() public returns (uint){
-        emit debug("DEBUG: getContractBalance");
+    function getContractBalance() public view returns (uint){
         return balance;
     }
 
