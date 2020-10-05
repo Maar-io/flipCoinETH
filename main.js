@@ -50,25 +50,30 @@ function eventListener(){
         console.log("Event coinFlipResult");
         if (!error){
             console.log(result);
-            refreshbalances();
-            refreshStats();
-            $("#result-text").removeClass("text-white").addClass("text-danger");
-            $("#result-text").text("You lost :(");
+            if (result["returnValues"][0] === "loser"){
+                refreshbalances();
+                refreshStats();
+                $("#result-text").removeClass("text-white").addClass("text-danger");
+                $("#result-text").text("You lost :(");
+            }
         }
         else{
             console.log("error in coinFlipResult");
             console.log(error);
         }
     });
-
+    
     var event4 = contractInstance.events.fundsSentToPlayer(function(error, result) {
         console.log("Event fundsSentToPlayer");
         if (!error){
             console.log(result);
-            refreshbalances();
-            refreshStats();
-            $("#result-text").removeClass("text-white").addClass("text-success");
-            $("#result-text").text("You won!!!!!");
+            console.log(["returnValues"][2]);
+            if (result["returnValues"][2] > 0){
+                refreshbalances();
+                refreshStats();
+                $("#result-text").removeClass("text-white").addClass("text-success");
+                $("#result-text").text("You won!!!!!");
+            }
         }
         else{
             console.log("error in fundsSentToPlayer");
@@ -102,7 +107,6 @@ function refreshStats(){
     contractInstance.methods.getPlayerData().call()
     .then((res) => {
             console.log(res);
-            console.log("plays " + res["plays"]);
             $("#stat-play").text("Plays: " + res["plays"]);
             $("#stat-won").text("Won: " + res["won"]);
             $("#stat-lost").text("Lost: " + res["lost"]);
